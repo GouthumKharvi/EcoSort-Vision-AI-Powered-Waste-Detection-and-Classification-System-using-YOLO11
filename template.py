@@ -17,6 +17,8 @@ list_of_files = [
 
     "data/.gitkeep",
 
+    "flowcharts/.gitkeep",
+
     "research/trials.ipynb",
 
     "templates/index.html",
