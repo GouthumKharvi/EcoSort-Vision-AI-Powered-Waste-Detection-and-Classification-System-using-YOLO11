@@ -1,9 +1,4 @@
-from ecosortvision.logger import logging
-from ecosortvision.exception import AppException
-import sys
+from ecosortvision.pipeline.training_pipeline import TrainPipeline
 
-try:
-    a = 3 / "s"
-
-except Exception as e:
-        raise AppException(e, sys)
+obj = TrainPipeline()
+obj.run_pipeline()
