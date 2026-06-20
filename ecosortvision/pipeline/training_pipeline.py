@@ -2,23 +2,21 @@ import sys, os
 from ecosortvision.logger import logging
 from ecosortvision.exception import AppException
 from ecosortvision.components.data_ingestion import DataIngestion
-# from ecosortvision.components.data_validation import DataValidation
+from ecosortvision.components.data_validation import DataValidation
 # from ecosortvision.components.model_trainer import ModelTrainer
 
 
-from ecosortvision.entity.config_entity import (DataIngestionConfig)
-                                                #  DataValidationConfig,
+from ecosortvision.entity.config_entity import (DataIngestionConfig, DataValidationConfig)
                                                 #  ModelTrainerConfig)
 
-from ecosortvision.entity.artifacts_entity import (DataIngestionArtifact)
-                                                    # DataValidationArtifact,
+from ecosortvision.entity.artifacts_entity import (DataIngestionArtifact,DataValidationArtifact)
                                                     # ModelTrainerArtifact)
 
 
 class TrainPipeline:
     def __init__(self):
         self.data_ingestion_config = DataIngestionConfig()
-        # self.data_validation_config = DataValidationConfig()
+        self.data_validation_config = DataValidationConfig()
         # self.model_trainer_config = ModelTrainerConfig()
 
 
@@ -48,29 +46,32 @@ class TrainPipeline:
 
 
     
-    # def start_data_validation(
-    #     self, data_ingestion_artifact: DataIngestionArtifact
-    # ) -> DataValidationArtifact:
-    #     logging.info("Entered the start_data_validation method of TrainPipeline class")
+    def start_data_validation(
+        self, data_ingestion_artifact: DataIngestionArtifact
+    ) -> DataValidationArtifact:
+        logging.info("Entered the start_data_validation method of TrainPipeline class")
 
-    #     try:
-    #         data_validation = DataValidation(
-    #             data_ingestion_artifact=data_ingestion_artifact,
-    #             data_validation_config=self.data_validation_config,
-    #         )
+        try:
+            data_validation = DataValidation(
+                data_ingestion_artifact=data_ingestion_artifact,
+                data_validation_config=self.data_validation_config,
+            )
 
-    #         data_validation_artifact = data_validation.initiate_data_validation()
+            data_validation_artifact = data_validation.initiate_data_validation()
 
-    #         logging.info("Performed the data validation operation")
+            logging.info("Performed the data validation operation")
 
-    #         logging.info(
-    #             "Exited the start_data_validation method of TrainPipeline class"
-    #         )
+            logging.info(
+                "Exited the start_data_validation method of TrainPipeline class"
+            )
 
-    #         return data_validation_artifact
+            return data_validation_artifact
 
-    #     except Exception as e:
-    #         raise AppException(e, sys) from e
+        except Exception as e:
+            raise AppException(e, sys) from e
+
+
+
 
 
 
@@ -97,9 +98,9 @@ class TrainPipeline:
         try:
             data_ingestion_artifact = self.start_data_ingestion()
             print(data_ingestion_artifact)
-            # data_validation_artifact = self.start_data_validation(
-            #     data_ingestion_artifact=data_ingestion_artifact
-            # )
+            data_validation_artifact = self.start_data_validation(
+                data_ingestion_artifact=data_ingestion_artifact
+            )
 
             # if data_validation_artifact.validation_status == True:
             #     model_trainer_artifact = self.start_model_trainer()
