@@ -32,6 +32,7 @@ DATA_VALIDATION_ALL_REQUIRED_FILES = ["train", "valid", "test", "data.yaml"]
 """
 MODEL TRAINER related constant start with MODEL_TRAINER var name
 """
+
 MODEL_TRAINER_DIR_NAME: str = "model_trainer"
 
 MODEL_TRAINER_PRETRAINED_WEIGHT_NAME: str = "yolo11n.pt"
@@ -39,3 +40,5 @@ MODEL_TRAINER_PRETRAINED_WEIGHT_NAME: str = "yolo11n.pt"
 MODEL_TRAINER_NO_EPOCHS: int = 1
 
 MODEL_TRAINER_BATCH_SIZE: int = 16
+
+

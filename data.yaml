@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 10
+names: ['battery', 'cardboard', 'clothes', 'glass', 'metal', 'miscellaneous trash', 'organic', 'paper', 'plastic', 'shoes']
+
+roboflow:
+  workspace: gouthums-workspace
+  project: garbage-euqch-y33ea
+  version: dataset
+  license: CC BY 4.0
+  url: https://app.roboflow.com/gouthums-workspace/garbage-euqch-y33ea/dataset
