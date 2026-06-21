@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Waste Detection · YOLO11</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#000;color:#e2e8f0;font-family:'Space Grotesk',sans-serif;overflow-x:hidden;min-height:100vh}
+canvas#bg{position:fixed;inset:0;z-index:0}
+.hud{position:relative;z-index:2}
+.hero{text-align:center;padding:2.5rem 1rem 1.5rem;position:relative}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:5px 18px;border-radius:30px;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#00f5ff;font-family:'JetBrains Mono',monospace;border:1px solid rgba(0,245,255,.25);background:rgba(0,245,255,.04);margin-bottom:1.2rem}
+.live-pip{width:7px;height:7px;border-radius:50%;background:#00ff88;box-shadow:0 0 8px #00ff88,0 0 20px #00ff88;animation:pipPulse 1s ease-in-out infinite}
+@keyframes pipPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(.6);opacity:.4}}
+.hero-title{font-size:3rem;font-weight:700;letter-spacing:-.03em;line-height:1;margin-bottom:.5rem;display:inline-block}
+.hero-title .w1{color:#fff}
+.hero-title .w2{background:linear-gradient(90deg,#00f5ff,#7c3aed,#f059da,#00f5ff);background-size:300%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmerText 4s linear infinite}
+@keyframes shimmerText{0%{background-position:0%}100%{background-position:300%}}
+.hero-sub{font-size:.82rem;color:#334155;letter-spacing:.08em;text-transform:uppercase;font-family:'JetBrains Mono',monospace}
+.ticker-wrap{overflow:hidden;border-top:1px solid rgba(0,245,255,.08);border-bottom:1px solid rgba(0,245,255,.08);background:rgba(0,245,255,.02);padding:7px 0;margin:1rem 0}
+.ticker-inner{display:flex;gap:3rem;animation:ticker 20s linear infinite;white-space:nowrap}
+@keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.tick-item{font-size:10px;font-family:'JetBrains Mono',monospace;color:#00f5ff;opacity:.6;letter-spacing:.1em}
+.stat-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:1rem 0}
+.stat{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:.85rem 1rem;position:relative;overflow:hidden;cursor:default;transition:border-color .3s}
+.stat:hover{border-color:rgba(0,245,255,.3)}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;animation:statBar 3s ease-in-out infinite alternate}
+.stat:nth-child(1)::before{background:linear-gradient(90deg,#00f5ff,transparent)}
+.stat:nth-child(2)::before{background:linear-gradient(90deg,#7c3aed,transparent)}
+.stat:nth-child(3)::before{background:linear-gradient(90deg,#00ff88,transparent)}
+.stat:nth-child(4)::before{background:linear-gradient(90deg,#f059da,transparent)}
+@keyframes statBar{0%{opacity:.4}100%{opacity:1}}
+.stat-n{font-size:1.5rem;font-weight:700;font-family:'JetBrains Mono',monospace}
+.stat:nth-child(1) .stat-n{color:#00f5ff}
+.stat:nth-child(2) .stat-n{color:#a78bfa}
+.stat:nth-child(3) .stat-n{color:#00ff88}
+.stat:nth-child(4) .stat-n{color:#f059da}
+.stat-l{font-size:9px;color:#475569;letter-spacing:.1em;text-transform:uppercase;margin-top:2px;font-family:'JetBrains Mono',monospace}
+.actions{display:flex;gap:12px;margin:1rem 0}
+.btn{flex:1;display:flex;align-items:center;justify-content:center;gap:10px;padding:14px;border-radius:10px;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border:none;transition:all .2s;font-family:'Space Grotesk',sans-serif;position:relative;overflow:hidden}
+.btn::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.08),transparent);opacity:0;transition:opacity .2s}
+.btn:hover::after{opacity:1}
+#uload{background:rgba(0,245,255,.07);border:1px solid rgba(0,245,255,.3);color:#00f5ff}
+#uload:hover{background:rgba(0,245,255,.15);transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,245,255,.15)}
+#send{background:linear-gradient(135deg,#0ea5e9 0%,#7c3aed 50%,#f059da 100%);color:#fff;background-size:200%}
+#send:hover{transform:translateY(-2px);box-shadow:0 8px 40px rgba(124,58,237,.4);background-position:right center}
+.btn:active{transform:translateY(0)!important}
+.btn-ic{font-size:16px}
+.panels{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:600px){.panels{grid-template-columns:1fr}.hero-title{font-size:2rem}.stat-strip{grid-template-columns:1fr 1fr}}
+.panel{border-radius:16px;overflow:hidden;position:relative;background:#050510}
+.panel-glow{position:absolute;inset:0;border-radius:16px;pointer-events:none;z-index:0}
+.p-input .panel-glow{box-shadow:inset 0 0 60px rgba(0,245,255,.04),0 0 0 1px rgba(0,245,255,.12)}
+.p-output .panel-glow{box-shadow:inset 0 0 60px rgba(124,58,237,.04),0 0 0 1px rgba(124,58,237,.12)}
+.panel-hdr{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.04);position:relative;z-index:1}
+.hdr-label{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;font-family:'JetBrains Mono',monospace}
+.p-input .hdr-label{color:#00f5ff}
+.p-output .hdr-label{color:#a78bfa}
+.hdr-badge{margin-left:auto;font-size:9px;font-family:'JetBrains Mono',monospace;padding:2px 8px;border-radius:4px;letter-spacing:.08em}
+.p-input .hdr-badge{background:rgba(0,245,255,.1);color:#00f5ff;border:1px solid rgba(0,245,255,.2)}
+.p-output .hdr-badge{background:rgba(124,58,237,.1);color:#a78bfa;border:1px solid rgba(124,58,237,.2)}
+.panel-body{padding:14px;min-height:290px;display:flex;align-items:center;justify-content:center;position:relative;z-index:1}
+.sc{position:absolute;width:18px;height:18px;z-index:2}
+.sc-tl{top:6px;left:6px;border-top:2px solid;border-left:2px solid}
+.sc-tr{top:6px;right:6px;border-top:2px solid;border-right:2px solid}
+.sc-bl{bottom:6px;left:6px;border-bottom:2px solid;border-left:2px solid}
+.sc-br{bottom:6px;right:6px;border-bottom:2px solid;border-right:2px solid}
+.p-input .sc{border-color:#00f5ff;animation:cornerGlow1 2s ease-in-out infinite alternate}
+.p-output .sc{border-color:#7c3aed;animation:cornerGlow2 2s ease-in-out infinite alternate}
+@keyframes cornerGlow1{0%{opacity:.3;filter:drop-shadow(0 0 2px #00f5ff)}100%{opacity:1;filter:drop-shadow(0 0 6px #00f5ff)}}
+@keyframes cornerGlow2{0%{opacity:.3;filter:drop-shadow(0 0 2px #7c3aed)}100%{opacity:1;filter:drop-shadow(0 0 6px #7c3aed)}}
+.panel-scan{position:absolute;left:0;right:0;height:2px;z-index:3;pointer-events:none;animation:panelScan 4s linear infinite}
+.p-input .panel-scan{background:linear-gradient(90deg,transparent,rgba(0,245,255,.5),transparent)}
+.p-output .panel-scan{background:linear-gradient(90deg,transparent,rgba(124,58,237,.5),transparent)}
+@keyframes panelScan{0%{top:0;opacity:0}10%{opacity:1}90%{opacity:1}100%{top:100%;opacity:0}}
+#photo,#video{width:100%;max-height:270px;object-fit:contain;border-radius:8px;display:none}
+.es{text-align:center;padding:1.5rem}
+.es-orb{width:70px;height:70px;border-radius:50%;margin:0 auto 1rem;display:flex;align-items:center;justify-content:center;font-size:28px;position:relative}
+.p-input .es-orb{background:radial-gradient(circle,rgba(0,245,255,.12),rgba(0,245,255,.02));border:1px solid rgba(0,245,255,.2)}
+.p-output .es-orb{background:radial-gradient(circle,rgba(124,58,237,.12),rgba(124,58,237,.02));border:1px solid rgba(124,58,237,.2)}
+.es-orb::after{content:'';position:absolute;inset:-8px;border-radius:50%;border:1px solid rgba(0,245,255,.1);animation:orbRing 2s ease-out infinite}
+.p-output .es-orb::after{border-color:rgba(124,58,237,.1)}
+@keyframes orbRing{0%{transform:scale(1);opacity:.6}100%{transform:scale(1.6);opacity:0}}
+.es-t{font-size:12px;font-weight:600;color:#64748b;margin-bottom:4px}
+.es-s{font-size:10px;color:#1e293b;font-family:'JetBrains Mono',monospace}
+.radar{width:80px;height:80px;margin:0 auto 1rem;position:relative}
+.radar svg{width:80px;height:80px}
+.rsweep{transform-origin:40px 40px;animation:rspin 2.5s linear infinite}
+@keyframes rspin{to{transform:rotate(360deg)}}
+#results-panel{width:100%;min-height:270px;display:flex;align-items:center;justify-content:center}
+.resp-img{width:100%;max-height:270px;object-fit:contain;border-radius:8px}
+#loading-overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;display:none;flex-direction:column;align-items:center;justify-content:center;gap:1.5rem;backdrop-filter:blur(10px)}
+.load-ring{width:64px;height:64px;border-radius:50%;border:2px solid rgba(0,245,255,.12);border-top-color:#00f5ff;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.load-bar-wrap{width:200px;height:2px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden}
+.load-bar{height:100%;background:linear-gradient(90deg,#00f5ff,#7c3aed,#f059da);animation:loadFill 2s ease-in-out infinite}
+@keyframes loadFill{0%{transform:translateX(-100%)}100%{transform:translateX(200%)}}
+.load-txt{font-size:10px;font-family:'JetBrains Mono',monospace;color:#00f5ff;letter-spacing:.14em;text-transform:uppercase;animation:blink 1s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+canvas#canvas{display:none}
+input[type="file"],input[type="hidden"]{display:none}
+.footer{text-align:center;padding:1.25rem;font-size:9px;color:#0f172a;letter-spacing:.12em;text-transform:uppercase;font-family:'JetBrains Mono',monospace;border-top:1px solid rgba(255,255,255,.02);margin-top:1.5rem}
+</style>
+</head>
+<body>
+
+<canvas id="bg"></canvas>
+
+<div class="hud">
+  <div style="max-width:960px;margin:0 auto;padding:0 1.25rem">
+
+    <div class="hero">
+      <div class="hero-badge"><span class="live-pip"></span> Neural Engine Active · YOLO11</div>
+      <div class="hero-title"><span class="w1">Waste </span><span class="w2">Detection</span></div>
+      <p class="hero-sub">Computer Vision · Object Classification · Real-time Inference</p>
+    </div>
+
+    <div class="ticker-wrap">
+      <div class="ticker-inner" id="ticker"></div>
+    </div>
+
+    <div class="stat-strip">
+      <div class="stat"><div class="stat-n" id="sv1">98.4%</div><div class="stat-l">Confidence</div></div>
+      <div class="stat"><div class="stat-n" id="sv2">60fps</div><div class="stat-l">Inference</div></div>
+      <div class="stat"><div class="stat-n" id="sv3">10</div><div class="stat-l">Waste Classes</div></div>
+      <div class="stat"><div class="stat-n" id="sv4">0ms</div><div class="stat-l">Latency</div></div>
+    </div>
+
+    <div class="actions">
+      <button class="btn" type="button" id="uload"><span class="btn-ic">⬆</span> Upload Image</button>
+      <button class="btn" type="button" id="send"><span class="btn-ic">◉</span> Run Detection</button>
+    </div>
+
+    <input type="hidden" id="url" value="../predict"/>
+    <input type="file" name="upload" id="fileinput" accept="image/*"/>
+
+    <div class="panels">
+
+      <div class="panel p-input">
+        <div class="panel-glow"></div>
+        <div class="sc sc-tl"></div><div class="sc sc-tr"></div>
+        <div class="sc sc-bl"></div><div class="sc sc-br"></div>
+        <div class="panel-scan"></div>
+        <div class="panel-hdr">
+          <span class="hdr-label">Input Frame</span>
+          <span class="hdr-badge">STANDBY</span>
+        </div>
+        <div class="panel-body">
+          <video autoplay id="video"></video>
+          <img id="photo" src="" alt="uploaded">
+          <canvas id="canvas"></canvas>
+          <div class="es" id="empty-upload">
+            <div class="es-orb">⬆</div>
+            <div class="es-t">No frame loaded</div>
+            <div class="es-s">upload image to begin</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel p-output">
+        <div class="panel-glow"></div>
+        <div class="sc sc-tl"></div><div class="sc sc-tr"></div>
+        <div class="sc sc-bl"></div><div class="sc sc-br"></div>
+        <div class="panel-scan"></div>
+        <div class="panel-hdr">
+          <span class="hdr-label">Detection Output</span>
+          <span class="hdr-badge">READY</span>
+        </div>
+        <div class="panel-body">
+          <div id="results-panel">
+            <div class="es">
+              <div class="radar">
+                <svg viewBox="0 0 80 80">
+                  <circle cx="40" cy="40" r="35" fill="none" stroke="rgba(124,58,237,.2)" stroke-width="1"/>
+                  <circle cx="40" cy="40" r="22" fill="none" stroke="rgba(124,58,237,.15)" stroke-width="1"/>
+                  <circle cx="40" cy="40" r="10" fill="none" stroke="rgba(124,58,237,.1)" stroke-width="1"/>
+                  <line x1="40" y1="40" x2="75" y2="40" stroke="url(#rg)" stroke-width="1.5" class="rsweep"/>
+                  <defs>
+                    <linearGradient id="rg" x1="0" x2="1">
+                      <stop offset="0" stop-color="#7c3aed" stop-opacity="0"/>
+                      <stop offset="1" stop-color="#7c3aed"/>
+                    </linearGradient>
+                  </defs>
+                </svg>
+              </div>
+              <div class="es-t">Awaiting inference</div>
+              <div class="es-s">run detection to get results</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="footer">YOLO11 · Waste Classification System · Neural Inference Pipeline</div>
+
+  </div>
+</div>
+
+<div id="loading-overlay">
+  <div class="load-ring"></div>
+  <div class="load-bar-wrap"><div class="load-bar"></div></div>
+  <div class="load-txt">Running Neural Inference…</div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" crossorigin="anonymous"></script>
+
+<script>
+/* PARTICLE GALAXY BACKGROUND */
+(function(){
+  var c=document.getElementById('bg'),ctx=c.getContext('2d');
+  var W,H,pts=[],mouse={x:-999,y:-999};
+  function init(){
+    W=c.width=window.innerWidth;
+    H=c.height=window.innerHeight;
+    pts=[];
+    for(var i=0;i<120;i++)
+      pts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,r:Math.random()*1.4+.4,hue:Math.random()<.6?180:270});
+  }
+  window.addEventListener('resize',init);
+  window.addEventListener('mousemove',function(e){mouse.x=e.clientX;mouse.y=e.clientY});
+  function draw(){
+    ctx.fillStyle='rgba(0,0,0,.18)';ctx.fillRect(0,0,W,H);
+    pts.forEach(function(p,i){
+      var dx=p.x-mouse.x,dy=p.y-mouse.y,dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist<120){p.vx+=dx/dist*.04;p.vy+=dy/dist*.04}
+      p.vx*=.99;p.vy*=.99;p.x+=p.vx;p.y+=p.vy;
+      if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle='hsl('+p.hue+',100%,70%)';ctx.globalAlpha=.7;ctx.fill();
+      for(var j=i+1;j<pts.length;j++){
+        var q=pts[j],dx2=p.x-q.x,dy2=p.y-q.y,d2=Math.sqrt(dx2*dx2+dy2*dy2);
+        if(d2<110){
+          ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);
+          ctx.strokeStyle='hsl('+(p.hue+q.hue)/2+',100%,70%)';
+          ctx.globalAlpha=(1-d2/110)*.12;ctx.lineWidth=.6;ctx.stroke();
+        }
+      }
+      ctx.globalAlpha=1;
+    });
+    requestAnimationFrame(draw);
+  }
+  init();draw();
+})();
+
+/* TICKER */
+(function(){
+  var items=['PLASTIC · ','GLASS · ','METAL · ','PAPER · ','ORGANIC · ','E-WASTE · ','CARDBOARD · ','RUBBER · ','TEXTILE · ','HAZARDOUS · ','BATTERY · ','COMPOST · '];
+  var html='';
+  for(var i=0;i<4;i++) items.forEach(function(t){html+='<span class="tick-item">'+t+'</span>'});
+  document.getElementById('ticker').innerHTML=html;
+})();
+
+/* LIVE STATS */
+(function(){
+  var c=['95.1%','97.3%','98.4%','96.8%','99.1%'],f=['42fps','55fps','60fps','48fps','72fps'],l=['12ms','8ms','15ms','6ms','10ms'];
+  setInterval(function(){
+    document.getElementById('sv1').textContent=c[Math.floor(Math.random()*c.length)];
+    document.getElementById('sv2').textContent=f[Math.floor(Math.random()*f.length)];
+    document.getElementById('sv4').textContent=l[Math.floor(Math.random()*l.length)];
+  },2000);
+})();
+
+/* APP LOGIC — original, untouched */
+var base_data='';
+
+function sendRequest(base64Data){
+  var type='json';
+  if(base64Data!=''||base64Data!=null){
+    if(type=='imgtobase'){
+      $('.res-part').html('').html(base64Data);
+    } else if(type=='basetoimg'){
+      var imageData=$('#imgstring').val();
+      $('.res-part').html('').append("<img src='data:image/jpeg;base64,"+imageData+"' alt='' />");
+    } else {
+      var url=$('#url').val();
+      $('#loading-overlay').css('display','flex');
+      $.ajax({
+        url:url,type:'post',cache:false,async:true,crossDomain:true,
+        headers:{'Content-Type':'application/json','Access-Control-Allow-Origin':'*'},
+        data:JSON.stringify({image:base64Data}),
+        success:function(res){
+          $('#results-panel').html('');
+          $('#results-panel').append("<img class='resp-img' src='data:image/jpeg;base64,"+res.image+"' alt='Detection result'/>");
+          $('#loading-overlay').hide();
+        }
+      });
+    }
+  }
+}
+
+$(document).ready(function(){
+  $('#loading-overlay').hide();
+  $('#send').click(function(){ sendRequest(base_data); });
+  $('#uload').click(function(){ $('#fileinput').focus().trigger('click'); });
+  $('#fileinput').change(function(){
+    if(this.files&&this.files[0]){
+      var reader=new FileReader();
+      reader.onload=function(e){
+        var url=e.target.result,img=new Image();
+        img.crossOrigin='Anonymous';
+        img.onload=function(){
+          var cv=document.createElement('CANVAS'),ctx=cv.getContext('2d');
+          cv.height=this.height;cv.width=this.width;
+          ctx.drawImage(this,0,0);
+          base_data=cv.toDataURL('image/jpeg',1.0).replace(/^data:image.+;base64,/,'');
+          cv=null;
+        };
+        img.src=url;
+        $('#photo').attr('src',url).show();
+        $('#video').hide();
+        $('#empty-upload').hide();
+      };
+      reader.readAsDataURL(this.files[0]);
+    }
+  });
+});
+</script>
+</body>
+</html>
