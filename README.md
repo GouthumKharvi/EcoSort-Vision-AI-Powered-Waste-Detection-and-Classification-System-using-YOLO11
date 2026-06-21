@@ -3,7 +3,7 @@
 <!-- ANIMATED HEADER -->
 <p align="center">
   <img src="https://readme-typing-svg.demolab.com?font=Poppins&size=40&pause=1000&color=00C896&center=true&vCenter=true&width=1000&height=100&lines=♻️+EcoSort-Vision;AI-Powered+Waste+Detection+System;YOLO11+%7C+Computer+Vision+%7C+Sustainability" />
-</p>
+</p> 
 
 <!-- BADGES -->
 <p align="center">
