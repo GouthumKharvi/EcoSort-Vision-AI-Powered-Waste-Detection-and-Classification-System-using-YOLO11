@@ -296,7 +296,7 @@ The Model Trainer uses YOLO11 with a custom architecture configuration to train 
 |---|---|
 | `model_trainer_dir` | `artifacts/model_trainer` |
 | `weight_name` | `yolo11n.pt` |
-| `no_epochs` | `1` |
+| `no_epochs` | `50` |
 | `batch_size` | `16` |
 | `img_size` | `640 x 640` |
 
