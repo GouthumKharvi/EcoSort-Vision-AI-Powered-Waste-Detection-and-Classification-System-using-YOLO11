@@ -309,7 +309,7 @@ Step 3  →  Load ultralytics/ultralytics/cfg/models/11/yolo11.yaml
 Step 4  →  Update nc in config to 10
 Step 5  →  Write custom_yolo11.yaml
 Step 6  →  Load pretrained yolo11n.pt weights
-Step 7  →  Run YOLO11 training (epochs=1, imgsz=640, batch=16)
+Step 7  →  Run YOLO11 training (epochs=50, imgsz=640, batch=16)
 Step 8  →  Copy best.pt → artifacts/model_trainer/best.pt
 ```
 
@@ -588,7 +588,7 @@ DATA_VALIDATION_ALL_REQUIRED_FILES = ["train", "valid", "test", "data.yaml"]
 # Model Trainer
 MODEL_TRAINER_DIR_NAME               = "model_trainer"
 MODEL_TRAINER_PRETRAINED_WEIGHT_NAME = "yolo11n.pt"
-MODEL_TRAINER_NO_EPOCHS              = 1
+MODEL_TRAINER_NO_EPOCHS              = 50
 MODEL_TRAINER_BATCH_SIZE             = 16
 ```
 
