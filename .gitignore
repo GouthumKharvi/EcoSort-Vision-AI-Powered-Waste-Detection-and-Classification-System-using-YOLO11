@@ -218,3 +218,5 @@ __marimo__/
 .streamlit/secrets.toml
 
 artifacts/*
+!artifacts/model_trainer/
+!artifacts/model_trainer/best.pt
