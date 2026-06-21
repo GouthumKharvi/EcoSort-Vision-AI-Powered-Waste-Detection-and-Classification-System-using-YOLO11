@@ -1,7 +1,9 @@
 <div align="center">
 
 <!-- ANIMATED HEADER -->
-<img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=200&section=header&text=EcoSort-Vision&fontSize=60&fontColor=fff&animation=twinkling&fontAlignY=35&desc=AI-Powered%20Waste%20Detection%20%26%20Classification%20System&descAlignY=55&descSize=18"/>
+<p align="center">
+  <img src="https://readme-typing-svg.demolab.com?font=Poppins&size=40&pause=1000&color=00C896&center=true&vCenter=true&width=1000&height=100&lines=♻️+EcoSort-Vision;AI-Powered+Waste+Detection+System;YOLO11+%7C+Computer+Vision+%7C+Sustainability" />
+</p>
 
 <!-- BADGES -->
 <p align="center">
