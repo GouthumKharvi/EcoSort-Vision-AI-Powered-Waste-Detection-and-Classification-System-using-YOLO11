@@ -2,8 +2,8 @@
 
 <!-- ANIMATED HEADER -->
 <p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=Poppins&size=40&pause=1000&color=00C896&center=true&vCenter=true&width=1000&height=100&lines=♻️+EcoSort-Vision;AI-Powered+Waste+Detection+System;YOLO11+%7C+Computer+Vision+%7C+Sustainability" />
-</p> 
+  <img src="https://readme-typing-svg.herokuapp.com?font=Orbitron&size=38&duration=3000&pause=1000&color=00FFB3&center=true&vCenter=true&width=1000&lines=♻️+EcoSort-Vision;Smart+Waste+Detection+%26+Classification;Powered+by+YOLO11+and+Computer+Vision;Building+a+Cleaner+Future+with+AI" />
+</p>
 
 <!-- BADGES -->
 <p align="center">
